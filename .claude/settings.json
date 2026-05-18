@@ -7,7 +7,12 @@
       "Bash(npm view *)",
       "Bash(node -e \"const data = require\\('fs'\\).readFileSync\\('/dev/stdin','utf8'\\); const versions = JSON.parse\\(data\\); const v5 = versions.filter\\(v => v.startsWith\\('5.'\\)\\); console.log\\('v5 versions:', v5.slice\\(-10\\)\\);\")",
       "Bash(npm run *)",
-      "Bash(git add *)"
+      "Bash(git add *)",
+      "Bash(git commit -m ' *)",
+      "Bash(git remote *)",
+      "Bash(git branch *)",
+      "Bash(git push *)",
+      "Bash(git config *)"
     ]
   }
 }
