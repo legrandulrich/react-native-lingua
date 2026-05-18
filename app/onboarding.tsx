@@ -1,6 +1,6 @@
 import { Image, Text, TouchableOpacity, View } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
-import { Stack } from "expo-router";
+import { Stack, router } from "expo-router";
 import { Ionicons } from "@expo/vector-icons";
 import { images } from "@/constants/images";
 
@@ -67,6 +67,7 @@ export default function OnboardingScreen() {
         <TouchableOpacity
           className="bg-lingua-purple rounded-[20px] py-[18px] flex-row items-center justify-center gap-2"
           activeOpacity={0.85}
+          onPress={() => router.push("/(auth)/sign-up")}
         >
           <Text className="font-poppins-semibold text-[17px] text-white">
             Get Started

@@ -12,7 +12,9 @@
       "Bash(git remote *)",
       "Bash(git branch *)",
       "Bash(git push *)",
-      "Bash(git config *)"
+      "Bash(git config *)",
+      "Bash(Get-ChildItem -Path \"c:\\\\Workspaces\\\\JSMASTERY\\\\duolingo-clone\" -Recurse -Name)",
+      "Bash(Select-Object -First 100)"
     ]
   }
 }
