@@ -1,5 +1,13 @@
 {
-  "enabledPlugins": {
-    "expo@claude-plugins-official": true
+  "permissions": {
+    "allow": [
+      "Bash(npm install *)",
+      "Bash(node -e \"const p = require\\('./package.json'\\); console.log\\('nativewind:', p.dependencies.nativewind\\); console.log\\('tailwindcss:', p.dependencies.tailwindcss\\); console.log\\('@tailwindcss/postcss:', p.dependencies['@tailwindcss/postcss']\\);\")",
+      "Bash(npm list *)",
+      "Bash(npm view *)",
+      "Bash(node -e \"const data = require\\('fs'\\).readFileSync\\('/dev/stdin','utf8'\\); const versions = JSON.parse\\(data\\); const v5 = versions.filter\\(v => v.startsWith\\('5.'\\)\\); console.log\\('v5 versions:', v5.slice\\(-10\\)\\);\")",
+      "Bash(npm run *)",
+      "Bash(git add *)"
+    ]
   }
 }

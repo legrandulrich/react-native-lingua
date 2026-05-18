@@ -1,53 +1,44 @@
-/**
- * Below are the colors that are used in the app. The colors are defined in the light and dark mode.
- * There are many other ways to style your app. For example, [Nativewind](https://www.nativewind.dev/), [Tamagui](https://tamagui.dev/), [unistyles](https://reactnativeunistyles.vercel.app), etc.
- */
+// Design tokens — use these in StyleSheet contexts (SafeAreaView, Animated, etc.)
+// For NativeWind className usage, see global.css @theme variables.
 
-import { Platform } from 'react-native';
+export const colors = {
+  // Brand
+  linguaPurple: '#6C4EF5',
+  linguaDeep: '#5B3BF6',
+  linguaBlue: '#4D88FF',
+  linguaGreen: '#21C16B',
 
-const tintColorLight = '#0a7ea4';
-const tintColorDark = '#fff';
+  // Semantic
+  success: '#21C16B',
+  warning: '#FFCB00',
+  streak: '#FF8A00',
+  error: '#FF4D4F',
+  info: '#4D88FF',
 
-export const Colors = {
-  light: {
-    text: '#11181C',
-    background: '#fff',
-    tint: tintColorLight,
-    icon: '#687076',
-    tabIconDefault: '#687076',
-    tabIconSelected: tintColorLight,
-  },
-  dark: {
-    text: '#ECEDEE',
-    background: '#151718',
-    tint: tintColorDark,
-    icon: '#9BA1A6',
-    tabIconDefault: '#9BA1A6',
-    tabIconSelected: tintColorDark,
-  },
-};
+  // Neutral
+  foreground: '#001132',
+  muted: '#6B7280',
+  border: '#E5E7EB',
+  surface: '#F6F7FB',
+  canvas: '#FFFFFF',
+} as const;
 
-export const Fonts = Platform.select({
-  ios: {
-    /** iOS `UIFontDescriptorSystemDesignDefault` */
-    sans: 'system-ui',
-    /** iOS `UIFontDescriptorSystemDesignSerif` */
-    serif: 'ui-serif',
-    /** iOS `UIFontDescriptorSystemDesignRounded` */
-    rounded: 'ui-rounded',
-    /** iOS `UIFontDescriptorSystemDesignMonospaced` */
-    mono: 'ui-monospace',
-  },
-  default: {
-    sans: 'normal',
-    serif: 'serif',
-    rounded: 'normal',
-    mono: 'monospace',
-  },
-  web: {
-    sans: "system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif",
-    serif: "Georgia, 'Times New Roman', serif",
-    rounded: "'SF Pro Rounded', 'Hiragino Maru Gothic ProN', Meiryo, 'MS PGothic', sans-serif",
-    mono: "SFMono-Regular, Menlo, Monaco, Consolas, 'Liberation Mono', 'Courier New', monospace",
-  },
-});
+export const fontFamily = {
+  regular: 'Poppins-Regular',
+  medium: 'Poppins-Medium',
+  semiBold: 'Poppins-SemiBold',
+  bold: 'Poppins-Bold',
+} as const;
+
+// Typography scale — fontSize (px) and lineHeight (px) pairs
+// Use in StyleSheet when NativeWind type-- utilities aren't applicable
+export const typography = {
+  h1: { fontFamily: 'Poppins-Bold', fontSize: 32, lineHeight: 38 },
+  h2: { fontFamily: 'Poppins-SemiBold', fontSize: 24, lineHeight: 31 },
+  h3: { fontFamily: 'Poppins-SemiBold', fontSize: 20, lineHeight: 26 },
+  h4: { fontFamily: 'Poppins-Medium', fontSize: 16, lineHeight: 22 },
+  bodyLg: { fontFamily: 'Poppins-Regular', fontSize: 16, lineHeight: 26 },
+  bodyMd: { fontFamily: 'Poppins-Regular', fontSize: 14, lineHeight: 22 },
+  bodySm: { fontFamily: 'Poppins-Regular', fontSize: 13, lineHeight: 21 },
+  caption: { fontFamily: 'Poppins-Regular', fontSize: 11, lineHeight: 15 },
+} as const;
