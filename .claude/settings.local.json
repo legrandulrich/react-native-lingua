@@ -1,0 +1,16 @@
+{
+  "permissions": {
+    "allow": [
+      "Bash(findstr /i \"clerk\\\\|react\")",
+      "Bash(node -e \"const pkg = JSON.parse\\(require\\('fs'\\).readFileSync\\('node_modules/@clerk/expo/package.json', 'utf8'\\)\\); const d = {...\\(pkg.dependencies||{}\\), ...\\(pkg.peerDependencies||{}\\)}; Object.entries\\(d\\).forEach\\(\\([k,v]\\)=>k.includes\\('clerk'\\)&&console.log\\(k,v\\)\\)\")",
+      "Bash(xargs grep -l '\"@clerk/react\"')",
+      "Bash(node -e \"const p=JSON.parse\\(require\\('fs'\\).readFileSync\\(0,'utf8'\\)\\); console.log\\('version:',p.version,'exports:',Object.keys\\(p.exports||{}\\).slice\\(0,5\\)\\)\")",
+      "Bash(xargs grep -l \"SignInSignalValue\")",
+      "Bash(awk 'NR>=2676 && NR<=2900' \"node_modules\\\\@clerk\\\\expo\\\\node_modules\\\\@clerk\\\\shared\\\\dist\\\\runtime\\\\index-DiuVvpQQ.d.ts\")",
+      "Bash(awk 'NR>=2900 && NR<=3050' \"node_modules\\\\@clerk\\\\expo\\\\node_modules\\\\@clerk\\\\shared\\\\dist\\\\runtime\\\\index-DiuVvpQQ.d.ts\")",
+      "Bash(awk 'NR>=5985 && NR<=6200' \"node_modules\\\\@clerk\\\\expo\\\\node_modules\\\\@clerk\\\\shared\\\\dist\\\\runtime\\\\index-DiuVvpQQ.d.ts\")",
+      "Bash(awk 'NR>=5777 && NR<=5850' \"node_modules\\\\@clerk\\\\expo\\\\node_modules\\\\@clerk\\\\shared\\\\dist\\\\runtime\\\\index-DiuVvpQQ.d.ts\")",
+      "Bash(awk 'NR>=2668 && NR<=2680' \"node_modules\\\\@clerk\\\\expo\\\\node_modules\\\\@clerk\\\\shared\\\\dist\\\\runtime\\\\index-DiuVvpQQ.d.ts\")"
+    ]
+  }
+}
