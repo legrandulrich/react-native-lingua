@@ -8,17 +8,29 @@ import {
   Text,
   TextInput,
   TouchableOpacity,
+  ActivityIndicator,
 } from "react-native";
 import { useRef, useState, useEffect } from "react";
-import { router } from "expo-router";
 
 interface Props {
   visible: boolean;
   email: string;
   onClose: () => void;
+  onVerify: (code: string) => Promise<void>;
+  onResend: () => void;
+  isLoading?: boolean;
+  error?: string;
 }
 
-export default function VerificationModal({ visible, email, onClose }: Props) {
+export default function VerificationModal({
+  visible,
+  email,
+  onClose,
+  onVerify,
+  onResend,
+  isLoading,
+  error,
+}: Props) {
   const [code, setCode] = useState("");
   const inputRef = useRef<TextInput>(null);
 
@@ -33,10 +45,8 @@ export default function VerificationModal({ visible, email, onClose }: Props) {
   const handleChangeText = (text: string) => {
     const digits = text.replace(/[^0-9]/g, "").slice(0, 6);
     setCode(digits);
-    if (digits.length === 6) {
-      setTimeout(() => {
-        router.replace("/");
-      }, 300);
+    if (digits.length === 6 && !isLoading) {
+      onVerify(digits);
     }
   };
 
@@ -95,11 +105,26 @@ export default function VerificationModal({ visible, email, onClose }: Props) {
             maxLength={6}
             style={styles.hiddenInput}
             caretHidden
+            editable={!isLoading}
           />
+
+          {isLoading && (
+            <ActivityIndicator
+              size="small"
+              color="#6c4ef5"
+              style={{ marginBottom: 12 }}
+            />
+          )}
+
+          {error ? (
+            <Text style={styles.errorText}>{error}</Text>
+          ) : null}
 
           <Text style={styles.resendRow}>
             Didn't receive the code?{" "}
-            <Text style={styles.resendLink}>Resend</Text>
+            <Text style={styles.resendLink} onPress={onResend}>
+              Resend
+            </Text>
           </Text>
         </View>
       </KeyboardAvoidingView>
@@ -173,6 +198,13 @@ const styles = StyleSheet.create({
     width: 1,
     height: 1,
     opacity: 0,
+  },
+  errorText: {
+    fontFamily: "Poppins-Regular",
+    fontSize: 13,
+    color: "#d32f2f",
+    textAlign: "center",
+    marginBottom: 12,
   },
   resendRow: {
     fontFamily: "Poppins-Regular",

@@ -11,15 +11,69 @@ import {
 import { SafeAreaView } from "react-native-safe-area-context";
 import { Stack, router } from "expo-router";
 import { Ionicons } from "@expo/vector-icons";
+import { useSignIn, useSSO } from "@clerk/expo";
+import * as WebBrowser from "expo-web-browser";
+import * as Linking from "expo-linking";
 import { images } from "@/constants/images";
 import VerificationModal from "@/components/VerificationModal";
 
-export default function SignInScreen() {
-  const [email, setEmail] = useState("");
-  const [modalVisible, setModalVisible] = useState(false);
+WebBrowser.maybeCompleteAuthSession();
 
-  const handleSignIn = () => {
-    if (email.trim()) setModalVisible(true);
+export default function SignInScreen() {
+  const { signIn, errors, fetchStatus } = useSignIn();
+  const { startSSOFlow } = useSSO();
+
+  const [email, setEmail] = useState("");
+  const [password, setPassword] = useState("");
+  const [showPassword, setShowPassword] = useState(false);
+  const [modalVisible, setModalVisible] = useState(false);
+  const [verifyError, setVerifyError] = useState("");
+
+  const handleSignIn = async () => {
+    if (!email.trim() || !password.trim()) return;
+
+    const { error } = await signIn.password({ emailAddress: email, password });
+    if (error) return;
+
+    if (signIn.status === "complete") {
+      await signIn.finalize({ navigate: () => router.replace("/") });
+    } else if (signIn.status === "needs_client_trust") {
+      await signIn.mfa.sendEmailCode();
+      setVerifyError("");
+      setModalVisible(true);
+    }
+  };
+
+  const handleVerifyMFA = async (code: string) => {
+    setVerifyError("");
+    const { error } = await signIn.mfa.verifyEmailCode({ code });
+    if (error) {
+      setVerifyError(error.message ?? "Invalid code. Please try again.");
+      return;
+    }
+    if (signIn.status === "complete") {
+      setModalVisible(false);
+      await signIn.finalize({ navigate: () => router.replace("/") });
+    }
+  };
+
+  const handleResendMFA = async () => {
+    setVerifyError("");
+    await signIn.mfa.sendEmailCode();
+  };
+
+  const handleModalClose = () => {
+    setModalVisible(false);
+    signIn.reset();
+  };
+
+  const handleSSOSignIn = async (strategy: "oauth_google" | "oauth_facebook" | "oauth_apple") => {
+    const redirectUrl = Linking.createURL("/");
+    const { createdSessionId, setActive } = await startSSOFlow({ strategy, redirectUrl });
+    if (createdSessionId && setActive) {
+      await setActive({ session: createdSessionId });
+      router.replace("/");
+    }
   };
 
   return (
@@ -64,12 +118,44 @@ export default function SignInScreen() {
             style={styles.inputField}
           />
         </View>
+        {errors.fields.identifier ? (
+          <Text style={styles.fieldError}>{errors.fields.identifier.message}</Text>
+        ) : null}
+
+        {/* Password input */}
+        <View style={[styles.inputContainer, styles.inputContainerRow]}>
+          <View style={{ flex: 1 }}>
+            <Text style={styles.inputLabel}>Password</Text>
+            <TextInput
+              value={password}
+              onChangeText={setPassword}
+              placeholder="••••••••"
+              placeholderTextColor="#9ca3af"
+              secureTextEntry={!showPassword}
+              style={styles.inputField}
+            />
+          </View>
+          <TouchableOpacity
+            onPress={() => setShowPassword(!showPassword)}
+            style={styles.eyeBtn}
+          >
+            <Ionicons
+              name={showPassword ? "eye-off-outline" : "eye-outline"}
+              size={22}
+              color="#9ca3af"
+            />
+          </TouchableOpacity>
+        </View>
+        {errors.fields.password ? (
+          <Text style={styles.fieldError}>{errors.fields.password.message}</Text>
+        ) : null}
 
         {/* Sign In button */}
         <TouchableOpacity
           className="bg-lingua-purple items-center rounded-[16px] py-[18px] mb-5"
           activeOpacity={0.85}
           onPress={handleSignIn}
+          disabled={fetchStatus === "fetching"}
         >
           <Text className="font-poppins-semibold text-[17px] text-white">
             Sign In
@@ -85,17 +171,29 @@ export default function SignInScreen() {
 
         {/* Social buttons */}
         <View className="gap-3 mb-7">
-          <TouchableOpacity style={styles.socialBtn} activeOpacity={0.8}>
+          <TouchableOpacity
+            style={styles.socialBtn}
+            activeOpacity={0.8}
+            onPress={() => handleSSOSignIn("oauth_google")}
+          >
             <Ionicons name="logo-google" size={22} color="#EA4335" />
             <Text style={styles.socialText}>Continue with Google</Text>
           </TouchableOpacity>
 
-          <TouchableOpacity style={styles.socialBtn} activeOpacity={0.8}>
+          <TouchableOpacity
+            style={styles.socialBtn}
+            activeOpacity={0.8}
+            onPress={() => handleSSOSignIn("oauth_facebook")}
+          >
             <Ionicons name="logo-facebook" size={22} color="#1877F2" />
             <Text style={styles.socialText}>Continue with Facebook</Text>
           </TouchableOpacity>
 
-          <TouchableOpacity style={styles.socialBtn} activeOpacity={0.8}>
+          <TouchableOpacity
+            style={styles.socialBtn}
+            activeOpacity={0.8}
+            onPress={() => handleSSOSignIn("oauth_apple")}
+          >
             <Ionicons name="logo-apple" size={22} color="#000000" />
             <Text style={styles.socialText}>Continue with Apple</Text>
           </TouchableOpacity>
@@ -118,7 +216,11 @@ export default function SignInScreen() {
       <VerificationModal
         visible={modalVisible}
         email={email}
-        onClose={() => setModalVisible(false)}
+        onClose={handleModalClose}
+        onVerify={handleVerifyMFA}
+        onResend={handleResendMFA}
+        isLoading={fetchStatus === "fetching"}
+        error={verifyError}
       />
     </SafeAreaView>
   );
@@ -148,6 +250,10 @@ const styles = StyleSheet.create({
     backgroundColor: "#ffffff",
     marginBottom: 14,
   },
+  inputContainerRow: {
+    flexDirection: "row",
+    alignItems: "center",
+  },
   inputLabel: {
     fontFamily: "Poppins-Regular",
     fontSize: 11,
@@ -159,6 +265,17 @@ const styles = StyleSheet.create({
     fontSize: 15,
     color: "#001132",
     paddingVertical: 4,
+  },
+  eyeBtn: {
+    paddingLeft: 8,
+    paddingBottom: 4,
+  },
+  fieldError: {
+    fontFamily: "Poppins-Regular",
+    fontSize: 12,
+    color: "#d32f2f",
+    marginTop: -10,
+    marginBottom: 8,
   },
   socialBtn: {
     flexDirection: "row",

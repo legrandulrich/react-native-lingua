@@ -11,17 +11,68 @@ import {
 import { SafeAreaView } from "react-native-safe-area-context";
 import { Stack, router } from "expo-router";
 import { Ionicons } from "@expo/vector-icons";
+import { useSignUp, useSSO } from "@clerk/expo";
+import * as WebBrowser from "expo-web-browser";
+import * as Linking from "expo-linking";
 import { images } from "@/constants/images";
 import VerificationModal from "@/components/VerificationModal";
 
+WebBrowser.maybeCompleteAuthSession();
+
 export default function SignUpScreen() {
+  const { signUp, errors, fetchStatus } = useSignUp();
+  const { startSSOFlow } = useSSO();
+
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [showPassword, setShowPassword] = useState(false);
   const [modalVisible, setModalVisible] = useState(false);
+  const [verifyError, setVerifyError] = useState("");
 
-  const handleSignUp = () => {
-    if (email.trim()) setModalVisible(true);
+  const handleSignUp = async () => {
+    if (!email.trim() || !password.trim()) return;
+
+    const { error } = await signUp.password({ emailAddress: email, password });
+    if (error) return;
+
+    if (
+      signUp.status === "missing_requirements" &&
+      signUp.unverifiedFields.includes("email_address") &&
+      signUp.missingFields.length === 0
+    ) {
+      await signUp.verifications.sendEmailCode();
+      setVerifyError("");
+      setModalVisible(true);
+    } else if (signUp.status === "complete") {
+      await signUp.finalize({ navigate: () => router.replace("/") });
+    }
+  };
+
+  const handleVerify = async (code: string) => {
+    setVerifyError("");
+    const { error } = await signUp.verifications.verifyEmailCode({ code });
+    if (error) {
+      setVerifyError(error.message ?? "Invalid code. Please try again.");
+      return;
+    }
+    if (signUp.status === "complete") {
+      setModalVisible(false);
+      await signUp.finalize({ navigate: () => router.replace("/") });
+    }
+  };
+
+  const handleResend = async () => {
+    setVerifyError("");
+    await signUp.verifications.sendEmailCode();
+  };
+
+  const handleSSOSignUp = async (strategy: "oauth_google" | "oauth_facebook" | "oauth_apple") => {
+    const redirectUrl = Linking.createURL("/");
+    const { createdSessionId, setActive } = await startSSOFlow({ strategy, redirectUrl });
+    if (createdSessionId && setActive) {
+      await setActive({ session: createdSessionId });
+      router.replace("/");
+    }
   };
 
   return (
@@ -66,6 +117,9 @@ export default function SignUpScreen() {
             style={styles.inputField}
           />
         </View>
+        {errors.fields.emailAddress ? (
+          <Text style={styles.fieldError}>{errors.fields.emailAddress.message}</Text>
+        ) : null}
 
         {/* Password input */}
         <View style={[styles.inputContainer, styles.inputContainerRow]}>
@@ -91,12 +145,16 @@ export default function SignUpScreen() {
             />
           </TouchableOpacity>
         </View>
+        {errors.fields.password ? (
+          <Text style={styles.fieldError}>{errors.fields.password.message}</Text>
+        ) : null}
 
         {/* Sign Up button */}
         <TouchableOpacity
           className="bg-lingua-purple items-center rounded-[16px] py-[18px] mb-5"
           activeOpacity={0.85}
           onPress={handleSignUp}
+          disabled={fetchStatus === "fetching"}
         >
           <Text className="font-poppins-semibold text-[17px] text-white">
             Sign Up
@@ -112,17 +170,29 @@ export default function SignUpScreen() {
 
         {/* Social buttons */}
         <View className="gap-3 mb-7">
-          <TouchableOpacity style={styles.socialBtn} activeOpacity={0.8}>
+          <TouchableOpacity
+            style={styles.socialBtn}
+            activeOpacity={0.8}
+            onPress={() => handleSSOSignUp("oauth_google")}
+          >
             <Ionicons name="logo-google" size={22} color="#EA4335" />
             <Text style={styles.socialText}>Continue with Google</Text>
           </TouchableOpacity>
 
-          <TouchableOpacity style={styles.socialBtn} activeOpacity={0.8}>
+          <TouchableOpacity
+            style={styles.socialBtn}
+            activeOpacity={0.8}
+            onPress={() => handleSSOSignUp("oauth_facebook")}
+          >
             <Ionicons name="logo-facebook" size={22} color="#1877F2" />
             <Text style={styles.socialText}>Continue with Facebook</Text>
           </TouchableOpacity>
 
-          <TouchableOpacity style={styles.socialBtn} activeOpacity={0.8}>
+          <TouchableOpacity
+            style={styles.socialBtn}
+            activeOpacity={0.8}
+            onPress={() => handleSSOSignUp("oauth_apple")}
+          >
             <Ionicons name="logo-apple" size={22} color="#000000" />
             <Text style={styles.socialText}>Continue with Apple</Text>
           </TouchableOpacity>
@@ -140,12 +210,19 @@ export default function SignUpScreen() {
             </Text>
           </TouchableOpacity>
         </View>
+
+        {/* Required for Clerk bot protection */}
+        <View nativeID="clerk-captcha" />
       </ScrollView>
 
       <VerificationModal
         visible={modalVisible}
         email={email}
         onClose={() => setModalVisible(false)}
+        onVerify={handleVerify}
+        onResend={handleResend}
+        isLoading={fetchStatus === "fetching"}
+        error={verifyError}
       />
     </SafeAreaView>
   );
@@ -194,6 +271,13 @@ const styles = StyleSheet.create({
   eyeBtn: {
     paddingLeft: 8,
     paddingBottom: 4,
+  },
+  fieldError: {
+    fontFamily: "Poppins-Regular",
+    fontSize: 12,
+    color: "#d32f2f",
+    marginTop: -10,
+    marginBottom: 8,
   },
   socialBtn: {
     flexDirection: "row",
