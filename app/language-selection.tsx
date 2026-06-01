@@ -5,13 +5,16 @@ import { Stack, router } from "expo-router";
 import { Ionicons } from "@expo/vector-icons";
 import { images } from "@/constants/images";
 import { LANGUAGES } from "@/data/languages";
-import { Language } from "@/types/learning";
+import { useLanguageStore } from "@/store/languageStore";
+import { Language, LanguageCode } from "@/types/learning";
 
 export default function LanguageSelectionScreen() {
-  const [selected, setSelected] = useState<string | null>(null);
+  const [selected, setSelected] = useState<LanguageCode | null>(null);
+  const setLanguage = useLanguageStore((state) => state.setLanguage);
 
   const handleConfirm = () => {
     if (!selected) return;
+    setLanguage(selected);
     router.replace("/");
   };
 
