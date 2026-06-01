@@ -43,7 +43,7 @@ export interface Lesson {
 
 export interface Unit {
   id: string;
-  languageId: string;
+  languageId: LanguageCode;
   title: string;
   description: string;
   order: number;
@@ -58,6 +58,6 @@ export interface Language {
   name: string;
   nativeName: string;
   flag: string;
-  totalUnits: number;
-  totalLessons: number;
+  color: string;
+  learners: string;
 }

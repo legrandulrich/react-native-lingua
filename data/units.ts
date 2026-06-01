@@ -4,7 +4,7 @@ export const units: Unit[] = [
   // Spanish
   {
     id: "es-unit-1",
-    languageId: "spanish",
+    languageId: "es",
     title: "Basics",
     description: "Greetings, numbers, and everyday words",
     order: 1,
@@ -13,7 +13,7 @@ export const units: Unit[] = [
   },
   {
     id: "es-unit-2",
-    languageId: "spanish",
+    languageId: "es",
     title: "People & Family",
     description: "Talk about yourself and the people around you",
     order: 2,
@@ -24,7 +24,7 @@ export const units: Unit[] = [
   // French
   {
     id: "fr-unit-1",
-    languageId: "french",
+    languageId: "fr",
     title: "Basics",
     description: "Greetings, numbers, and everyday words",
     order: 1,
@@ -33,7 +33,7 @@ export const units: Unit[] = [
   },
   {
     id: "fr-unit-2",
-    languageId: "french",
+    languageId: "fr",
     title: "Food & Drink",
     description: "Order food and talk about what you like",
     order: 2,
@@ -44,7 +44,7 @@ export const units: Unit[] = [
   // Japanese
   {
     id: "ja-unit-1",
-    languageId: "japanese",
+    languageId: "ja",
     title: "Basics",
     description: "Essential greetings and introductions",
     order: 1,
@@ -53,7 +53,7 @@ export const units: Unit[] = [
   },
   {
     id: "ja-unit-2",
-    languageId: "japanese",
+    languageId: "ja",
     title: "Numbers & Time",
     description: "Count and tell the time in Japanese",
     order: 2,
