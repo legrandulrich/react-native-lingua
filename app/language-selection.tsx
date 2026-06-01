@@ -15,7 +15,7 @@ export default function LanguageSelectionScreen() {
   const handleConfirm = () => {
     if (!selected) return;
     setLanguage(selected);
-    router.replace("/");
+    router.replace("/(tabs)");
   };
 
   const renderItem = ({ item }: { item: Language }) => {
